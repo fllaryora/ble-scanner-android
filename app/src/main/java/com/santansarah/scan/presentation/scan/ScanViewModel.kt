@@ -1,12 +1,13 @@
 package com.santansarah.scan.presentation.scan
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.santansarah.scan.local.entities.ScannedDevice
 import com.santansarah.scan.local.entities.displayName
-import com.santansarah.scan.domain.interfaces.IAnalytics
+//import com.santansarah.scan.domain.interfaces.IAnalytics
 import com.santansarah.scan.domain.interfaces.IBleRepository
 import com.santansarah.scan.domain.models.BleConnectEvents
 import com.santansarah.scan.domain.models.BleReadWriteCommands
@@ -40,7 +41,7 @@ class ScanViewModel(
     private val bleGatt: BleGatt,
     private val bleRepository: IBleRepository,
     private val dispatcher: CoroutineDispatcher,
-    private val analytics: IAnalytics
+    //private val analytics: IAnalytics
 ) : ViewModel() {
 
     val isScanning by mutableStateOf(bleManager.isScanning)
@@ -192,12 +193,13 @@ class ScanViewModel(
 
     fun readCharacteristic(uuid: String) {
         bleGatt.readCharacteristic(uuid)
-        analytics.logCharacteristicEvent(
+        /*analytics.logCharacteristicEvent(
             CharacteristicEvent(
             eventName = AnalyticsEventType.READ_CHARACTERISTIC.name,
             uuid = uuid
         )
-        )
+        )*/
+        Timber.i("readCharacteristic")
         //showUserMessage("Request sent.")
     }
 
@@ -235,12 +237,13 @@ class ScanViewModel(
         try {
             if (bytes.isNotEmpty()) {
                 bleGatt.writeBytes(uuid, bytes.decodeHex())
-                analytics.logCharacteristicEvent(
+                /*analytics.logCharacteristicEvent(
                     CharacteristicEvent(
                     eventName = AnalyticsEventType.WRITE_CHARACTERISTIC.name,
                     uuid = uuid
                 )
-                )
+                )*/
+                Timber.i("onWriteCharacteristic")
             } else
                 showUserMessage("Hex can't be null.")
         } catch (badHex: Exception) {

@@ -5,14 +5,14 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
-import com.santansarah.scan.domain.interfaces.IAnalytics
+//import com.google.firebase.analytics.ktx.analytics
+//import com.google.firebase.ktx.Firebase
+//import com.santansarah.scan.domain.interfaces.IAnalytics
 import com.santansarah.scan.presentation.BleGatt
 import com.santansarah.scan.presentation.BleManager
 import com.santansarah.scan.presentation.control.ControlViewModel
 import com.santansarah.scan.presentation.scan.ScanViewModel
-import com.santansarah.scan.utils.logging.Analytics
+//import com.santansarah.scan.utils.logging.Analytics
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +24,8 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    single { Firebase.analytics }
-    single<IAnalytics> { Analytics(get()) }
+    //single { Firebase.analytics }
+    //single<IAnalytics> { Analytics(get()) }
 
     fun provideBluetoothManager(app: Application): BluetoothManager {
         return app.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -42,7 +42,8 @@ val appModule = module {
     single { BleManager(get(), get(), get()) }
     single { BleGatt(androidApplication(), get(), get(), get(), get(), get()) }
 
-    viewModel { ScanViewModel(get(), get(), get(), get(named("IODispatcher")), get()) }
+    //viewModel { ScanViewModel(get(), get(), get(), get(named("IODispatcher")), get()) }
+    viewModel { ScanViewModel(get(), get(), get(), get(named("IODispatcher"))) }
     viewModel { ControlViewModel(get(), get(), get(named("IODispatcher")), get()) }
 
 }

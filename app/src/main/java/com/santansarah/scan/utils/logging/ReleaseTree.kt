@@ -1,7 +1,7 @@
 package com.santansarah.scan.utils.logging
 
 import android.util.Log
-import com.google.firebase.crashlytics.FirebaseCrashlytics
+//import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 
 class ReleaseTree: Timber.Tree() {
@@ -15,12 +15,13 @@ class ReleaseTree: Timber.Tree() {
         super.log(priority, tag, message, t)
 
         if (priority == Log.ERROR) {
-            FirebaseCrashlytics.getInstance().also {
+            /*FirebaseCrashlytics.getInstance().also {
                 it.setCustomKey(Priority, priority)
                 tag?.let { _ -> it.setCustomKey(Tag, tag) }
                 it.log(message)
                 t?.let { e -> it.recordException(e) }
-            }
+            }*/
+            Timber.tag(tag?:"UNKNOWN").e(t, message)
         }
     }
 }

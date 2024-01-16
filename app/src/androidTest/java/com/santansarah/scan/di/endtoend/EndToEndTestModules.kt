@@ -4,7 +4,7 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.BluetoothLeScanner
 import androidx.test.core.app.ApplicationProvider
-import com.santansarah.scan.domain.interfaces.IAnalytics
+//import com.santansarah.scan.domain.interfaces.IAnalytics
 import com.santansarah.scan.domain.interfaces.IBleRepository
 import com.santansarah.scan.domain.usecases.ParseDescriptor
 import com.santansarah.scan.domain.usecases.ParseNotification
@@ -29,7 +29,7 @@ val endToEndModule = module {
 
     single<Application> { ApplicationProvider.getApplicationContext() }
 
-    single<IAnalytics> { mockk(relaxed = true) }
+    //single<IAnalytics> { mockk(relaxed = true) }
 
     single {
         mockk<BluetoothAdapter>(relaxed = true)
@@ -50,8 +50,8 @@ val endToEndModule = module {
     single { mockk<BleGatt>(relaxed = true) }
     //single { mockk<BleDatabase>(relaxed = true) }
 
-    viewModel { ScanViewModel(get(), get(), get(), UnconfinedTestDispatcher(), get()) }
-
+    //viewModel { ScanViewModel(get(), get(), get(), UnconfinedTestDispatcher(), get()) }
+    viewModel { ScanViewModel(get(), get(), get(), UnconfinedTestDispatcher()) }
     single { ParseScanResult(get()) }
     single { ParseService(get()) }
     single { ParseRead() }

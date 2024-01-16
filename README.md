@@ -2,10 +2,6 @@
 
 ![GitHub issues](https://img.shields.io/github/issues/santansarah/ble-scanner) ![GitHub closed issues](https://img.shields.io/github/issues-closed/santansarah/ble-scanner)
 
-> [Terms of Service](Terms.md) | [Privacy Policy](PrivacyPolicy.md)
-
-<a href='https://play.google.com/store/apps/details?id=com.santansarah.scan&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' style="width:300px"/></a>
-
 SanTanScan is a Bluetooth Low Energy (BLE) scanner and debugger available for Android 9+. It scans
 your
 home or office for any nearby BLE devices, allowing you to sort by signal strength (RSSI), device
@@ -89,14 +85,6 @@ I use Google Analytics & Crashlytics to track app usage information. Because of 
 excluded my `google-services.json` file, so you'll have issues running the main branch as-is.
 There are a few ways to get up and running:
 
-* Switch to
-  the [`filters-previews-test`](https://github.com/santansarah/ble-scanner/tree/filters-previews-tests)
-  branch. It doesn't use [Firebase](https://firebase.google.com/).
-* Comment out the [Firebase](https://firebase.google.com/) dependencies. Analytics is an Interface,
-  so you could update the Koin DI folder to use an empty implementation.
-* Create your own [Firebase](https://firebase.google.com/) project and include your unique
-  `google-services.json`. You'll need to create your own unique `Package Name` if you choose this
-  option.
 
 ## Video 1: Prepopulated Room Database, Data Layer Setup, and Room JUnit 5 Tests
 

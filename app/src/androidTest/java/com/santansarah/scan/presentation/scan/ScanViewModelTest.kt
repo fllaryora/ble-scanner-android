@@ -4,7 +4,7 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.BluetoothLeScanner
 import app.cash.turbine.test
-import com.santansarah.scan.domain.interfaces.IAnalytics
+//import com.santansarah.scan.domain.interfaces.IAnalytics
 import com.santansarah.scan.domain.models.ConnectionState
 import com.santansarah.scan.domain.models.ScanFilterOption
 import com.santansarah.scan.domain.usecases.ParseScanResult
@@ -46,7 +46,7 @@ import kotlin.test.assertNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScanViewModelTest : KoinTest {
 
-    private val analytics: IAnalytics = mockk(relaxed = true)
+    //private val analytics: IAnalytics = mockk(relaxed = true)
     private val btAdapter: BluetoothAdapter = get()
     private val btLeScanner: BluetoothLeScanner = get()
     private val bleGatt = mockk<BleGatt>(relaxed = true)
@@ -93,9 +93,13 @@ class ScanViewModelTest : KoinTest {
             emit(deviceList.filter { it.favorite })
         }
 
-        scanViewModel = ScanViewModel(
+        /*scanViewModel = ScanViewModel(
             bleManager = bleManager, bleGatt = bleGatt,
             bleRepository = bleRepository, dispatcher = dispatcher, analytics = analytics
+        )*/
+        scanViewModel = ScanViewModel(
+            bleManager = bleManager, bleGatt = bleGatt,
+            bleRepository = bleRepository, dispatcher = dispatcher
         )
 
     }
