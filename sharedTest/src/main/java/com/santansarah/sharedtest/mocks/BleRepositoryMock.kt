@@ -48,7 +48,7 @@ class BleRepositoryMock: IBleRepository {
 
     }
 
-    override suspend fun getMsDevice(byteArray: ByteArray): String? {
+    override suspend fun getMicrosoftDevice(byteArray: ByteArray): String? {
         TODO("Not yet implemented")
     }
 

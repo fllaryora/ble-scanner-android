@@ -7,6 +7,7 @@ import com.santansarah.scan.domain.bleparsables.PreferredConnectionParams
 import com.santansarah.scan.utils.decodeSkipUnreadable
 import com.santansarah.scan.utils.print
 import com.santansarah.scan.utils.toBinaryString
+import com.santansarah.scan.utils.toFloat
 import com.santansarah.scan.utils.toHex
 import timber.log.Timber
 
@@ -75,11 +76,11 @@ fun DeviceCharacteristics.updateBytes(fromDevice: ByteArray): DeviceCharacterist
 }
 
 fun DeviceCharacteristics.updateDescriptors(uuidFromDevice: String, fromDevice: ByteArray): List<DeviceDescriptor> {
-    return descriptors.map {
-        if (it.uuid == uuidFromDevice)
-            it.copy(readBytes = fromDevice)
+    return descriptors.map { device : DeviceDescriptor ->
+        if (device.uuid == uuidFromDevice)
+            device.copy(readBytes = fromDevice)
         else
-            it
+            device
     }
 }
 
@@ -91,12 +92,12 @@ fun DeviceCharacteristics.updateNotification(fromDevice: ByteArray): DeviceChara
 
 fun DeviceCharacteristics.getReadInfo(): String {
 
-    val sb = StringBuilder()
+    val stringBuilder = StringBuilder()
 
     Timber.d("readbytes from first load: $readBytes")
 
-    readBytes?.let { bytes ->
-        with(sb) {
+    readBytes?.let { bytes :ByteArray ->
+        with(stringBuilder) {
             when (uuid) {
                 Appearance.uuid -> {
                     appendLine(Appearance.getReadStringFromBytes(bytes))
@@ -106,7 +107,13 @@ fun DeviceCharacteristics.getReadInfo(): String {
                     append(PreferredConnectionParams.getReadStringFromBytes(bytes))
 
                 else -> {
-                    appendLine("String, Hex, Bytes, Binary:")
+                    val arduinoFloatSize = 4
+                    if(bytes.size == arduinoFloatSize) {
+                        appendLine("Float, String, Hex, Bytes, Binary:")
+                        appendLine(bytes.toFloat())
+                    } else {
+                        appendLine("String, Hex, Bytes, Binary:")
+                    }
                     appendLine(bytes.decodeSkipUnreadable())
                     appendLine(bytes.toHex())
                     appendLine("[" + bytes.print() + "]")
@@ -114,9 +121,9 @@ fun DeviceCharacteristics.getReadInfo(): String {
                 }
             }
         }
-    } ?: sb.appendLine("No data.")
+    } ?: stringBuilder.appendLine("No data.")
 
-    return sb.toString()
+    return stringBuilder.toString()
 }
 
 fun DeviceCharacteristics.getWriteCommands(): Array<String> {

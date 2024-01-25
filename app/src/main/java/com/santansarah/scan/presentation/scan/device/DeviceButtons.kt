@@ -27,8 +27,8 @@ fun DeviceButtons(
 ) {
     Row() {
         ConnectButtons(connectEnabled, onConnect, device, disconnectEnabled, onDisconnect)
-        services.flatMap { it.characteristics }.find {
-            it.uuid == ELKBLEDOM.uuid
+        services.flatMap { service -> service.characteristics }.find { characteristics ->
+            characteristics.uuid == ELKBLEDOM.uuid
         }?.also {
             FilledIconButton(
                 /*colors = IconButtonDefaults.filledIconButtonColors(

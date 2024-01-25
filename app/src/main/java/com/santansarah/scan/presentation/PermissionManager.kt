@@ -23,12 +23,12 @@ class PermissionManager(
         key,
         owner,
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
+    ) { permissions: Map<String, @JvmSuppressWildcards Boolean> ->
         // Handle Permission granted/rejected
-        permissions.entries.forEach {
-            Timber.d(it.toString())
-            val permissionName = it.key
-            val isGranted = it.value
+        permissions.entries.forEach { stringBooleanEntry ->
+            Timber.d(stringBooleanEntry.toString())
+            val permissionName = stringBooleanEntry.key
+            val isGranted = stringBooleanEntry.value
             if (isGranted) {
                 // Permission is granted
             } else {

@@ -43,11 +43,11 @@ class BleRepository(
             extra = device.extra,
             lastSeen = device.lastSeen,
             customName = existingDevice?.customName,
-            baseRssi = existingDevice?.let {
-                val lowRssi = it.baseRssi - 20
-                val highRssi = it.baseRssi + 20
+            baseRssi = existingDevice?.let { scannedDevice ->
+                val lowRssi = scannedDevice.baseRssi - 20
+                val highRssi = scannedDevice.baseRssi + 20
                 if (device.rssi in lowRssi..highRssi)
-                    it.baseRssi
+                    scannedDevice.baseRssi
                 else
                     device.rssi
             } ?: device.rssi,
@@ -67,31 +67,36 @@ class BleRepository(
         val devices = dao.getScannedDevices()
         Timber.d("got devices..")
 
-        return scanFilter?.let { scanFilter ->
-            when (scanFilter) {
-                ScanFilterOption.RSSI -> devices.map { deviceList ->
-                    deviceList.filter { !it.forget }.sortedByDescending { it.baseRssi }
+        return scanFilter?.let { scanFilterNotNull : ScanFilterOption ->
+            when (scanFilterNotNull) {
+                ScanFilterOption.RSSI -> devices.map { deviceList : List<ScannedDevice> ->
+                    deviceList.filter { device ->
+                        !device.forget
+                    }.sortedByDescending { device -> device.baseRssi }
                 }
 
-                ScanFilterOption.NAME -> devices.map { deviceList ->
-                    deviceList.filter {
-                        (it.deviceName != null || it.customName != null) && !it.forget
+                ScanFilterOption.NAME -> devices.map { deviceList : List<ScannedDevice> ->
+                    deviceList.filter { device ->
+                        (device.deviceName != null || device.customName != null) && !device.forget
+                    }.sortedBy { device ->
+                        device.customName ?: device.deviceName
                     }
-                        .sortedBy { it.customName ?: it.deviceName }
                 }
 
-                ScanFilterOption.FAVORITES -> devices.map { deviceList ->
-                    deviceList.filter { it.favorite && !it.forget }
+                ScanFilterOption.FAVORITES -> devices.map { deviceList: List<ScannedDevice> ->
+                    deviceList.filter { device -> device.favorite && !device.forget }
                 }
-                ScanFilterOption.FORGET -> devices.map { deviceList ->
-                    deviceList.filter { it.forget }
+                ScanFilterOption.FORGET -> devices.map { deviceList: List<ScannedDevice> ->
+                    deviceList.filter { device -> device.forget }
                 }
             }
-        } ?: devices.map { deviceList -> deviceList.filter { !it.forget } }
+        } ?: devices.map { deviceList: List<ScannedDevice> ->
+            deviceList.filter { device -> !device.forget }
+        }
 
     }
 
-    override suspend fun getMsDevice(
+    override suspend fun getMicrosoftDevice(
         byteArray: ByteArray
     ): String? {
         val msDeviceType = byteArray[1].toHex().toInt()
@@ -103,9 +108,9 @@ class BleRepository(
     ): List<String>? {
         var serviceNames: MutableList<String>? = null
 
-        serviceIdRecord.forEach { serviceId ->
+        serviceIdRecord.forEach { serviceId: ParcelUuid ->
             val formattedId = serviceId.uuid.toGss()
-            getServiceById(formattedId)?.name?.let { serviceName ->
+            getServiceById(formattedId)?.name?.let { serviceName: String ->
                 if (serviceNames == null)
                     serviceNames = mutableListOf()
                 serviceNames?.add(serviceName)

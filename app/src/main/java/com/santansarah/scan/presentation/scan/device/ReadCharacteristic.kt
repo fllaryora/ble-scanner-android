@@ -32,7 +32,7 @@ import timber.log.Timber
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun ReadCharacteristic(
-    char: DeviceCharacteristics,
+    characteristics: DeviceCharacteristics,
     onRead: (String) -> Unit,
     onShowUserMessage: (String) -> Unit
 ) {
@@ -42,7 +42,7 @@ fun ReadCharacteristic(
         //.padding(6.dp)
     ) {
         AssistChip(
-            enabled = char.canRead,
+            enabled = characteristics.canRead,
             label = { Text(text = "Read") },
             leadingIcon = {
                 Icon(
@@ -52,11 +52,11 @@ fun ReadCharacteristic(
                     contentDescription = "Read"
                 )
             },
-            onClick = { onRead(char.uuid) })
+            onClick = { onRead(characteristics.uuid) })
         Spacer(modifier = Modifier.width(10.dp))
         val clipboardManager = LocalClipboardManager.current
         AssistChip(
-            enabled = char.readBytes != null,
+            enabled = characteristics.readBytes != null,
             label = { Text(text = "Copy") },
             leadingIcon = {
                 Icon(
@@ -67,7 +67,7 @@ fun ReadCharacteristic(
             },
             onClick = {
                 clipboardManager.setText(
-                    AnnotatedString(char.getReadInfo())
+                    AnnotatedString(characteristics.getReadInfo())
                 )
                 onShowUserMessage("Data Copied.")
             })
@@ -83,11 +83,11 @@ fun ReadCharacteristic(
     ) {
         SelectionContainer {
             Column {
-                Timber.d(char.uuid)
+                Timber.d(characteristics.uuid)
                 Timber.d(Appearance.uuid)
 
                 Text(
-                    text = char.getReadInfo(),
+                    text = characteristics.getReadInfo(),
                     style = codeFont
                 )
             }

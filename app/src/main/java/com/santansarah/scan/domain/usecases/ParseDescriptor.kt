@@ -2,10 +2,14 @@ package com.santansarah.scan.domain.usecases
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattDescriptor
+import com.santansarah.scan.domain.models.DeviceCharacteristics
 import com.santansarah.scan.domain.models.DeviceService
 import com.santansarah.scan.domain.models.updateDescriptors
 import timber.log.Timber
 
+/**
+ * It handles onDescriptorRead
+ */
 class ParseDescriptor() {
 
     operator fun invoke(
@@ -19,17 +23,18 @@ class ParseDescriptor() {
 
             Timber.d(value.toString())
 
-            val newList = deviceDetails.map { dd ->
-                dd.copy(characteristics =
-                dd.characteristics.map { char ->
-                    if (descriptor.characteristic.uuid.toString() == char.uuid) {
-                        char.copy(
+            val newList = deviceDetails.map { deviceService :DeviceService ->
+                deviceService.copy(characteristics =
+                deviceService.characteristics.map {
+                        characteristics :DeviceCharacteristics ->
+                    if (descriptor.characteristic.uuid.toString() == characteristics.uuid) {
+                        characteristics.copy(
                             descriptors =
-                            char.updateDescriptors(descriptor.uuid.toString(), value)
+                            characteristics.updateDescriptors(descriptor.uuid.toString(), value)
                         )
                     }
                     else
-                        char
+                        characteristics
                 })
             }
 

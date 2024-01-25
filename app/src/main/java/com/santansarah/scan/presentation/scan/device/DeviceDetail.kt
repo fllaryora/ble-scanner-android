@@ -152,7 +152,7 @@ fun DeviceDetails(device: ScannedDevice) {
         )
     }
     Text(
-        text = device.address,
+        text = device.address, //MAC
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSecondaryContainer
     )

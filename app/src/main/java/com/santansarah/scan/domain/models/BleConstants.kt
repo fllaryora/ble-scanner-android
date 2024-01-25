@@ -18,11 +18,11 @@ enum class BlePermissions(val value: Int) {
     companion object {
 
         fun getAllPermissions(bleValue: Int): List<BlePermissions> {
-            var propertyList = mutableListOf<BlePermissions>()
+            val propertyList = mutableListOf<BlePermissions>()
 
-            values().forEach {
-                if (bleValue and it.value > 0)
-                    propertyList.add(it)
+            values().forEach { permissions : BlePermissions ->
+                if (bleValue and permissions.value > 0)
+                    propertyList.add(permissions)
             }
             return propertyList
 
@@ -36,16 +36,13 @@ enum class BleWriteTypes(val value: Int) {
     WRITE_TYPE_SIGNED(4);
 
     companion object {
-
         fun getAllTypes(bleValue: Int): List<BleWriteTypes> {
-            var propertyList = mutableListOf<BleWriteTypes>()
-
-            values().forEach {
-                if (bleValue and it.value > 0)
-                    propertyList.add(it)
+            val propertyList = mutableListOf<BleWriteTypes>()
+            values().forEach { writeTypes ->
+                if (bleValue and writeTypes.value > 0)
+                    propertyList.add(writeTypes)
             }
             return propertyList
-
         }
     }
 }
@@ -63,11 +60,10 @@ enum class BleProperties(val value: Int) {
     companion object {
 
         fun getAllProperties(bleValue: Int): List<BleProperties> {
-            var propertyList = mutableListOf<BleProperties>()
-
-            values().forEach {
-                if (bleValue and it.value > 0)
-                    propertyList.add(it)
+            val propertyList = mutableListOf<BleProperties>()
+            values().forEach { properties: BleProperties ->
+                if (bleValue and properties.value > 0)
+                    propertyList.add(properties)
             }
             return propertyList
 
@@ -92,7 +88,8 @@ fun List<BlePermissions>.canWritePermissions(): Boolean = this.any(
 )
 
 fun List<BleProperties>.propsToString() =
-    this.joinToString(", ") { it.name }
+    this.joinToString(", ") { properties -> properties.name }
 
-fun List<BleWriteTypes>.writeTypesToString() = this.joinToString(", ") { it.name }
+fun List<BleWriteTypes>.writeTypesToString() =
+    this.joinToString(", ") { writeTypes -> writeTypes.name }
 

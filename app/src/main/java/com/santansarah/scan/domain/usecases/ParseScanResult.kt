@@ -3,6 +3,7 @@ package com.santansarah.scan.domain.usecases
 import android.annotation.SuppressLint
 import android.bluetooth.le.ScanResult
 import android.util.SparseArray
+import com.santansarah.scan.domain.MICROSOFT
 import com.santansarah.scan.domain.interfaces.IBleRepository
 import com.santansarah.scan.local.entities.ScannedDevice
 import com.santansarah.scan.utils.toMillis
@@ -17,27 +18,28 @@ class ParseScanResult
     suspend operator fun invoke(result: ScanResult) {
 
         try {
-
             var mfName: String? = null
             var services: List<String>? = null
             var extra: List<String>? = null
 
-            result.scanRecord?.manufacturerSpecificData?.let { mfData ->
-                getMfId(mfData)?.let { mfId ->
-                    mfName = bleRepository.getCompanyById(mfId)?.name
+            result.scanRecord?.manufacturerSpecificData?.let { manufacturedData : SparseArray<ByteArray> ->
+                getManufacturedId(manufacturedData)?.let { manufacturedId : Int ->
+                    mfName = bleRepository.getCompanyById(manufacturedId)?.name
 
-                    result.scanRecord?.getManufacturerSpecificData(mfId)?.let { mfBytes ->
-                        if (mfId == 6) {
-                            bleRepository.getMsDevice(mfBytes)?.let { msDevice ->
-                                extra = listOf(msDevice)
+                    result.scanRecord?.getManufacturerSpecificData(manufacturedId)?.let {
+                            manufacturedBytes : ByteArray ->
+                        if (manufacturedId == MICROSOFT) {
+                            bleRepository.getMicrosoftDevice(manufacturedBytes)?.let {
+                                    microsoftDevice : String ->
+                                extra = listOf(microsoftDevice)
                             }
                         }
                     }
                 }
             }
 
-            result.scanRecord?.serviceUuids?.let {
-                services = bleRepository.getServices(it)
+            result.scanRecord?.serviceUuids?.let { parcelUuidsList ->
+                services = bleRepository.getServices(parcelUuidsList)
             }
 
             val device = ScannedDevice(
@@ -55,22 +57,26 @@ class ParseScanResult
                 forget = false
             )
 
-            val recNum = bleRepository.insertDevice(device)
-        } catch (e: Exception) {
-            Timber.e(e, "Insert Device")
+            // Only show my Device
+            if(result.device.name == "Air Quality Detector") {
+                val recNum = bleRepository.insertDevice(device)
+                Timber.d("Insert at: $recNum")
+            }
+        } catch (exception: Exception) {
+            Timber.e(exception, "Insert Device")
         }
 
     }
 
-    private fun getMfId(
-        mfData: SparseArray<ByteArray>
+    private fun getManufacturedId(
+        manufacturedData: SparseArray<ByteArray>
     ): Int? {
 
-        var mfId: Int? = null
-        for (i in 0 until mfData.size()) {
-            mfId = mfData.keyAt(i)
+        var manufacturedId: Int? = null
+        for (i in 0 until manufacturedData.size()) {
+            manufacturedId = manufacturedData.keyAt(i)
         }
-        return mfId
+        return manufacturedId
     }
 
 }

@@ -55,14 +55,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.santansarah.scan.BuildConfig
 import com.santansarah.scan.R
-import com.santansarah.scan.domain.aboutLink
-import com.santansarah.scan.domain.bugLink
-import com.santansarah.scan.domain.discussionsLink
-import com.santansarah.scan.domain.gitHubLink
-import com.santansarah.scan.domain.linkedInLink
-import com.santansarah.scan.domain.privacyPolicy
-import com.santansarah.scan.domain.termsLink
-import com.santansarah.scan.domain.youTubeLink
+import com.santansarah.scan.domain.ABOUT_LINK
+import com.santansarah.scan.domain.BUG_LINK
+import com.santansarah.scan.domain.DISCUSSIONS_LINK
+import com.santansarah.scan.domain.GITHUB_LINK
+import com.santansarah.scan.domain.LINKEDIN_LINK
+import com.santansarah.scan.domain.PRIVACY_POLICY
+import com.santansarah.scan.domain.TERMS_LINK
+import com.santansarah.scan.domain.YOUTUBE_LINK
 import com.santansarah.scan.presentation.components.BasicBackTopAppBar
 import com.santansarah.scan.presentation.previewparams.FeatureParams
 import com.santansarah.scan.presentation.previewparams.LandscapeLayouts
@@ -129,8 +129,8 @@ fun AboutScreen(
                             onBackClicked = onBackClicked,
                             titleContent = {
                                 SocialIcons(
-                                    uriHandler, youTubeLink,
-                                    linkedInLink, gitHubLink
+                                    uriHandler, YOUTUBE_LINK,
+                                    LINKEDIN_LINK, GITHUB_LINK
                                 )
                             }
                         )
@@ -153,18 +153,18 @@ fun AboutScreen(
                         when (currentPagingIndex) {
                             0 -> AboutAndPrivacy(
                                 uriHandler = uriHandler,
-                                aboutLink = aboutLink,
-                                privacyPolicyLink = privacyPolicy,
-                                termsLink = termsLink
+                                aboutLink = ABOUT_LINK,
+                                privacyPolicyLink = PRIVACY_POLICY,
+                                termsLink = TERMS_LINK
                             )
 
                             1 -> HelpCard(
                                 uriHandler = uriHandler,
-                                discussionsLink = discussionsLink,
+                                discussionsLink = DISCUSSIONS_LINK,
                             )
 
                             else ->
-                                BugCard(uriHandler = uriHandler, bugLink = bugLink)
+                                BugCard(uriHandler = uriHandler, bugLink = BUG_LINK)
                         }
                     }
                 }
@@ -178,7 +178,7 @@ fun AboutScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AppInfo()
-                    SocialIcons(uriHandler, youTubeLink, linkedInLink, gitHubLink)
+                    SocialIcons(uriHandler, YOUTUBE_LINK, LINKEDIN_LINK, GITHUB_LINK)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 AboutPager(currentPagingIndex = currentPagingIndex,
@@ -194,18 +194,18 @@ fun AboutScreen(
                     when (currentPagingIndex) {
                         0 -> AboutAndPrivacy(
                             uriHandler = uriHandler,
-                            aboutLink = aboutLink,
-                            privacyPolicyLink = privacyPolicy,
-                            termsLink = termsLink
+                            aboutLink = ABOUT_LINK,
+                            privacyPolicyLink = PRIVACY_POLICY,
+                            termsLink = TERMS_LINK
                         )
 
                         1 -> HelpCard(
                             uriHandler = uriHandler,
-                            discussionsLink = discussionsLink,
+                            discussionsLink = DISCUSSIONS_LINK,
                         )
 
                         else ->
-                            BugCard(uriHandler = uriHandler, bugLink = bugLink)
+                            BugCard(uriHandler = uriHandler, bugLink = BUG_LINK)
                     }
                 }
 

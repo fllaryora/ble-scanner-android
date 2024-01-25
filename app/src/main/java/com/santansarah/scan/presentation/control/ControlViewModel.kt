@@ -9,6 +9,7 @@ import com.santansarah.scan.domain.interfaces.IBleRepository
 import com.santansarah.scan.domain.models.AppRouteArgs.ADDRESS
 import com.santansarah.scan.domain.models.ConnectionState
 import com.santansarah.scan.domain.models.ControlState
+import com.santansarah.scan.domain.models.DeviceService
 import com.santansarah.scan.presentation.BleGatt
 import com.santansarah.scan.utils.decodeHex
 import com.santansarah.scan.utils.toHex2
@@ -42,11 +43,13 @@ class ControlViewModel(
         _selectedDevice
     ) { services, bleMessage, userMessage, selectedDevice ->
 
-        services.let { svcs ->
-            svcs.flatMap { it.characteristics }.find {
-                it.uuid == ELKBLEDOM.uuid
-            }?.also {
-                readCharacteristic(it.uuid)
+        services.let { serviceList:  List<DeviceService> ->
+            serviceList.flatMap { service ->
+                service.characteristics
+            }.find { characteristics ->
+                characteristics.uuid == ELKBLEDOM.uuid
+            }?.also { characteristics ->
+                readCharacteristic(characteristics.uuid)
             }
         }
 
@@ -75,9 +78,11 @@ class ControlViewModel(
     }
 
     fun getReadBytes(): ByteArray? {
-        return _services.value.let { svcs ->
-            svcs.flatMap { it.characteristics }.find {
-                it.uuid == ELKBLEDOM.uuid
+        return _services.value.let { serviceList : List<DeviceService> ->
+            serviceList.flatMap { service ->
+                service.characteristics
+            }.find { characteristics ->
+                characteristics.uuid == ELKBLEDOM.uuid
             }?.readBytes
         }
     }

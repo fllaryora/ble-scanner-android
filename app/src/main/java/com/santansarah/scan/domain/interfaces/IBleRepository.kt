@@ -28,7 +28,7 @@ interface IBleRepository {
 
     fun getScannedDevices(scanFilter: ScanFilterOption?): Flow<List<ScannedDevice>>
 
-    suspend fun getMsDevice(
+    suspend fun getMicrosoftDevice(
         byteArray: ByteArray
     ): String?
 

@@ -161,7 +161,7 @@ fun ServicePagerDetail(
             .verticalScroll(rememberScrollState())
     ) {
 
-        service.characteristics.forEach { char ->
+        service.characteristics.forEach { characteristics ->
             OutlinedCard(
                 modifier = Modifier
                     .defaultMinSize(minHeight = 200.dp)
@@ -184,15 +184,15 @@ fun ServicePagerDetail(
                         ) {
 
                             Text(
-                                text = char.name,
+                                text = characteristics.name,
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = char.uuid.uppercase(),
+                                text = characteristics.uuid.uppercase(),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                text = char.properties.propsToString(),
+                                text = characteristics.properties.propsToString(),
                                 style = bodySmallItalic
                             )
                         }
@@ -207,14 +207,14 @@ fun ServicePagerDetail(
 
 
                     if (state == 0) {
-                        ReadCharacteristic(char, onRead, onShowUserMessage)
+                        ReadCharacteristic(characteristics, onRead, onShowUserMessage)
                     } else {
-                        WriteCharacteristic(char, onWrite)
+                        WriteCharacteristic(characteristics, onWrite)
                     }
 
-                    if (char.descriptors.isNotEmpty()) {
+                    if (characteristics.descriptors.isNotEmpty()) {
 
-                        char.descriptors.forEach { desc ->
+                        characteristics.descriptors.forEach { descriptor ->
 
                             var descriptorState by rememberSaveable { mutableStateOf(0) }
                             var descriptorExpanded by rememberSaveable { mutableStateOf(false) }
@@ -240,14 +240,14 @@ fun ServicePagerDetail(
                                         )
                                         Text(
                                             modifier = Modifier.padding(start = 4.dp),
-                                            text = desc.name,
+                                            text = descriptor.name,
                                             style = MaterialTheme.typography.labelLarge,
                                             color = MaterialTheme.colorScheme.onSecondary
                                         )
                                     }
                                     Text(
                                         //modifier = Modifier.padding(start = 12.dp),
-                                        text = desc.uuid.uppercase(),
+                                        text = descriptor.uuid.uppercase(),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSecondary
                                     )
@@ -261,12 +261,12 @@ fun ServicePagerDetail(
 
                             if (descriptorState == 0) {
                                 ReadDescriptor(
-                                    char.uuid,
-                                    descriptor = desc, onRead = onReadDescriptor,
+                                    characteristics.uuid,
+                                    descriptor = descriptor, onRead = onReadDescriptor,
                                     onShowUserMessage = onShowUserMessage
                                 )
                             } else
-                                WriteDescriptor(descriptor = desc, onWrite = onWriteDescriptor)
+                                WriteDescriptor(descriptor = descriptor, onWrite = onWriteDescriptor)
 
                         }
                         //}
@@ -274,12 +274,12 @@ fun ServicePagerDetail(
 
                 }
             }
-            if (service.characteristics.indexOf(char) < service.characteristics.count() - 1) {
+            if (service.characteristics.indexOf(characteristics) < service.characteristics.count() - 1) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
 
-            /*char.descriptors.forEach { desc ->
+            /*characteristics.descriptors.forEach { desc ->
                     Text(text = "- ${desc.uuid}")
                     Text(text = desc.permissions.toString())
                 }*/

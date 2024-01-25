@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothProfile
 import android.os.Build
 import com.santansarah.scan.domain.bleparsables.CCCD
@@ -73,8 +74,8 @@ class BleGatt(
 
             scope.launch {
                 deviceDetails.value = emptyList()
-                gatt?.let {
-                    deviceDetails.value = parseService(it, status)
+                gatt?.let { bluetoothGatt ->
+                    deviceDetails.value = parseService(bluetoothGatt, status)
                     enableNotificationsAndIndications()
                 }
             }
@@ -87,7 +88,7 @@ class BleGatt(
             status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, value, status)
-            deviceDetails.value = parseRead(deviceDetails.value, characteristic, status)
+            deviceDetails.value = parseRead(value, deviceDetails.value, characteristic, status)
         }
 
         @Deprecated("Deprecated in Java")
@@ -97,7 +98,7 @@ class BleGatt(
             status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
-            deviceDetails.value = parseRead(deviceDetails.value, characteristic, status)
+            deviceDetails.value = parseRead(null, deviceDetails.value, characteristic, status)
         }
 
         @Deprecated("Deprecated in Java")
@@ -172,22 +173,22 @@ class BleGatt(
 
     }
 
-    suspend fun enableNotificationsAndIndications() {
+    suspend fun enableNotificationsAndIndications() {// Post parse services and characteristics
 
-        btGatt?.services?.forEach { gattSvcForNotify ->
-            gattSvcForNotify.characteristics?.forEach { svcChar ->
+        btGatt?.services?.forEach { gattSvcForNotify: BluetoothGattService ->
+            gattSvcForNotify.characteristics?.forEach { gattCharacteristic: BluetoothGattCharacteristic ->
 
-                svcChar.descriptors.find { desc ->
-                    desc.uuid.toString() == CCCD.uuid
-                }?.also { cccd ->
-                    val notifyRegistered = btGatt?.setCharacteristicNotification(svcChar, true)
+                gattCharacteristic.descriptors.find { desc : BluetoothGattDescriptor->
+                    desc.uuid.toString() == CCCD.uuid //0x2902 the characteristic is notificable or indicable ?
+                }?.also { cccd: BluetoothGattDescriptor ->
+                    val notifyRegistered = btGatt?.setCharacteristicNotification(gattCharacteristic, true)
 
-                    if (svcChar.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY > 0) {
+                    if (gattCharacteristic.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY > 0) {
                         cccd.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
                         btGatt?.writeDescriptor(cccd)
                     }
 
-                    if (svcChar.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE > 0) {
+                    if (gattCharacteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE > 0) {
                         cccd.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE)
                         btGatt?.writeDescriptor(cccd)
                     }
@@ -203,23 +204,25 @@ class BleGatt(
 
     fun connect(address: String) {
         if (btAdapter.isEnabled) {
-            btAdapter.let { adapter ->
+            btAdapter.let { adapter: BluetoothAdapter ->
                 try {
                     connectMessage.value = ConnectionState.CONNECTING
                     val device = adapter.getRemoteDevice(address)
                     device.connectGatt(app, false, bluetoothGattCallback)
-                } catch (e: Exception) {
+                } catch (exception: Exception) {
                     connectMessage.value = ConnectionState.DISCONNECTED
-                    Timber.tag("BTGATT_CONNECT").e(e)
+                    Timber.tag("BTGATT_CONNECT").e(exception)
                 }
             }
         }
     }
 
     fun readCharacteristic(uuid: String) {
-        btGatt?.services?.flatMap { it.characteristics }?.find { svcChar ->
-            svcChar.uuid.toString() == uuid
-        }?.also { foundChar ->
+        btGatt?.services?.flatMap { gattService: BluetoothGattService ->
+            gattService.characteristics
+        }?.find { gattCharacteristic: BluetoothGattCharacteristic ->
+            gattCharacteristic.uuid.toString() == uuid
+        }?.also { foundChar: BluetoothGattCharacteristic ->
             Timber.d("Found Char: " + foundChar.uuid.toString())
             btGatt?.readCharacteristic(foundChar)
         }
@@ -227,13 +230,16 @@ class BleGatt(
 
     fun readDescriptor(charUuid: String, descUuid: String) {
 
-        val currentCharacteristic = btGatt?.services?.flatMap { it.characteristics }?.find { char ->
-            char.uuid.toString() == charUuid
+        val currentCharacteristic = btGatt?.services?.flatMap { gattService: BluetoothGattService ->
+            gattService.characteristics
+        }?.find { gattCharacteristic: BluetoothGattCharacteristic ->
+            gattCharacteristic.uuid.toString() == charUuid
         }
-        currentCharacteristic?.let { char ->
-            char.descriptors.find { desc ->
-                desc.uuid.toString() == descUuid
-            }?.also { foundDesc ->
+
+        currentCharacteristic?.let { gattCharacteristic: BluetoothGattCharacteristic ->
+            gattCharacteristic.descriptors.find { gattDescriptor: BluetoothGattDescriptor ->
+                gattDescriptor.uuid.toString() == descUuid
+            }?.also { foundDesc: BluetoothGattDescriptor ->
                 Timber.d("Found Char: $charUuid; " + foundDesc.uuid.toString())
                 btGatt?.readDescriptor(foundDesc)
             }
@@ -242,9 +248,11 @@ class BleGatt(
     }
 
     fun writeBytes(uuid: String, bytes: ByteArray) {
-        btGatt?.services?.flatMap { it.characteristics }?.find { svcChar ->
-            svcChar.uuid.toString() == uuid
-        }?.also { foundChar ->
+        btGatt?.services?.flatMap { gattService : BluetoothGattService ->
+            gattService.characteristics
+        }?.find { gattCharacteristic : BluetoothGattCharacteristic ->
+            gattCharacteristic.uuid.toString() == uuid
+        }?.also { foundChar:BluetoothGattCharacteristic ->
             Timber.d("Found Char: " + foundChar.uuid.toString())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 btGatt?.writeCharacteristic(
@@ -261,13 +269,18 @@ class BleGatt(
     }
 
     fun writeDescriptor(charUuid: String, uuid: String, bytes: ByteArray) {
-        btGatt?.services?.flatMap { it.characteristics }?.flatMap { it.descriptors }
-            ?.find { it.characteristic.uuid.toString() == charUuid && it.uuid.toString() == uuid }
-            ?.also { foundDescriptor ->
+        btGatt?.services?.flatMap { gattService : BluetoothGattService ->
+            gattService.characteristics
+        }?.flatMap { gattCharacteristic : BluetoothGattCharacteristic ->
+            gattCharacteristic.descriptors
+        }
+            ?.find { gattDescriptor: BluetoothGattDescriptor ->
+                gattDescriptor.characteristic.uuid.toString() == charUuid &&
+                        gattDescriptor.uuid.toString() == uuid
+            }?.also { foundDescriptor: BluetoothGattDescriptor ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     btGatt?.writeDescriptor(foundDescriptor, bytes)
-                } else
-                {
+                } else {
                     foundDescriptor.setValue(bytes)
                     btGatt?.writeDescriptor(foundDescriptor)
                 }
@@ -278,13 +291,13 @@ class BleGatt(
         connectMessage.value = ConnectionState.DISCONNECTED
         deviceDetails.value = emptyList()
         try {
-            btGatt?.let { gatt ->
+            btGatt?.let { gatt: BluetoothGatt ->
                 gatt.disconnect()
                 gatt.close()
                 btGatt = null
             }
-        } catch (e: Exception) {
-            Timber.tag("BTGATT_CLOSE").e(e)
+        } catch (exception: Exception) {
+            Timber.tag("BTGATT_CLOSE").e(exception)
         } finally {
             btGatt = null
         }

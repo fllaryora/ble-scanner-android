@@ -40,7 +40,7 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WriteCharacteristic(
-    char: DeviceCharacteristics,
+    characteristics: DeviceCharacteristics,
     onWrite: (String, String) -> Unit
 ) {
     Column {
@@ -53,7 +53,7 @@ fun WriteCharacteristic(
             mutableStateOf("")
         }
 
-        val listItems = char.getWriteCommands()
+        val listItems = characteristics.getWriteCommands()
         if (listItems.isNotEmpty()) {
             Text(
                 text = "Hints:",
@@ -74,7 +74,7 @@ fun WriteCharacteristic(
         Spacer(Modifier.height(10.dp))
 
         OutlinedTextField(
-            enabled = char.canWrite,
+            enabled = characteristics.canWrite,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             ),
@@ -114,7 +114,7 @@ fun WriteCharacteristic(
             )
         }
         AssistChip(
-            enabled = char.canWrite,
+            enabled = characteristics.canWrite,
             label = { Text(text = "Write") },
             leadingIcon = {
                 Icon(
@@ -126,7 +126,7 @@ fun WriteCharacteristic(
             },
             onClick = {
                 onWrite(
-                    char.uuid,
+                    characteristics.uuid,
                     customHexToWrite.substringAfter("0x")
                 )
                 wroteHex = customHexToWrite

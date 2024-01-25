@@ -60,19 +60,20 @@ fun DeviceDescriptor.getWriteCommands(): Array<String> {
 
 fun DeviceDescriptor.getReadInfo(): String {
 
-    val sb = StringBuilder()
+    val stringBuilder = StringBuilder()
 
     Timber.d("readbytes from first load: $readBytes")
 
-    readBytes?.let { bytes ->
-        with(sb) {
+    readBytes?.let { bytes :ByteArray ->
+        with(stringBuilder) {
             when (uuid) {
-                CCCD.uuid -> {
+                CCCD.uuid -> { //notification and indications
                     appendLine(CCCD.getReadStringFromBytes(bytes))
                     appendLine("[" + bytes.print() + "]")
                 }
 
                 else -> {
+                    //bytes contain custom additional metadata of the characteristic
                     appendLine("String, Hex, Bytes, Binary:")
                     appendLine(bytes.decodeSkipUnreadable())
                     appendLine(bytes.toHex())
@@ -81,9 +82,9 @@ fun DeviceDescriptor.getReadInfo(): String {
                 }
             }
         }
-    } ?: sb.appendLine("No data.")
+    } ?: stringBuilder.appendLine("No data.")
 
-    return sb.toString()
+    return stringBuilder.toString()
 }
 
 

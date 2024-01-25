@@ -85,8 +85,8 @@ class BleManager(
                     userMessage.value = "You must enable Bluetooth to start scanning."
                 }
             }
-        } catch (e: Exception) {
-            Timber.e(e, e.message, "START_SCAN")
+        } catch (exception: Exception) {
+            Timber.e(exception, exception.message, "START_SCAN")
         }
     }
 
@@ -95,8 +95,8 @@ class BleManager(
         try {
             if (btAdapter.isEnabled)
                 btScanner.stopScan(scanCallback)
-        } catch (e: Exception) {
-            Timber.d(e.message)
+        } catch (exception: Exception) {
+            Timber.d(exception.message)
         }
         finally {
             isScanning.value = false

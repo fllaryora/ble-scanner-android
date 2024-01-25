@@ -2,6 +2,10 @@ package com.santansarah.scan.domain.usecases
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattService
+import com.santansarah.scan.domain.Chemistry
 import com.santansarah.scan.local.entities.Service
 import com.santansarah.scan.domain.interfaces.IBleRepository
 import com.santansarah.scan.domain.models.BlePermissions
@@ -15,6 +19,9 @@ import com.santansarah.scan.domain.models.canWriteProperties
 import com.santansarah.scan.utils.toGss
 import timber.log.Timber
 
+/**
+ * It handles on Services Discovered
+ */
 class ParseService
     (
     private val bleRepository: IBleRepository
@@ -27,10 +34,9 @@ class ParseService
         val services = mutableListOf<DeviceService>()
 
         if (status == BluetoothGatt.GATT_SUCCESS) {
-            gatt.services?.forEach { gattService ->
-
-                val serviceName =
-                    bleRepository.getServiceById(gattService.uuid.toGss())?.name ?: "Mfr Service"
+            gatt.services?.forEach { gattService : BluetoothGattService ->
+                val serviceName = bleRepository.getServiceById(gattService.uuid.toGss())?.name ?:
+                    Chemistry.getNameByServiceUUID(gattService.uuid.toString())
 
                 val service = Service(
                     "",
@@ -41,30 +47,31 @@ class ParseService
 
                 val characteristics = mutableListOf<DeviceCharacteristics>()
 
-                gattService.characteristics.forEach { char ->
+                gattService.characteristics.forEach { characteristic : BluetoothGattCharacteristic ->
                     val deviceCharacteristic = bleRepository
-                        .getCharacteristicById(char.uuid.toGss())
+                        .getCharacteristicById(characteristic.uuid.toGss())
 
-                    val permissions = char.permissions
-                    val properties = BleProperties.getAllProperties(char.properties)
-                    val writeTypes = BleWriteTypes.getAllTypes(char.writeType)
+                    val permissions = characteristic.permissions
+                    val properties = BleProperties.getAllProperties(characteristic.properties)
+                    val writeTypes = BleWriteTypes.getAllTypes(characteristic.writeType)
 
                     val descriptors = mutableListOf<DeviceDescriptor>()
-                    char.descriptors?.forEach { desc ->
+                    characteristic.descriptors?.forEach { gattDescriptor: BluetoothGattDescriptor ->
 
-                        Timber.d(char.uuid.toString())
-                        Timber.d(desc.uuid.toString() + "; " + desc.characteristic.uuid.toString())
+                        Timber.d(characteristic.uuid.toString())
+                        Timber.d(gattDescriptor.uuid.toString() + "; " + gattDescriptor.characteristic.uuid.toString())
 
                         val deviceDescriptor = bleRepository.getDescriptorById(
-                            desc.uuid.toGss()
+                            gattDescriptor.uuid.toGss()
                         )
 
                         descriptors.add(
                             DeviceDescriptor(
-                                uuid = desc.uuid.toString(),
-                                name = deviceDescriptor?.name ?: "Unknown",
-                                charUuid = desc.characteristic.uuid.toString(),
-                                permissions = BlePermissions.getAllPermissions(desc.permissions),
+                                uuid = gattDescriptor.uuid.toString(),
+                                name = deviceDescriptor?.name ?:
+                                Chemistry.getNameByDescriptorUUID(gattDescriptor.uuid.toString()),
+                                charUuid = gattDescriptor.characteristic.uuid.toString(),
+                                permissions = BlePermissions.getAllPermissions(gattDescriptor.permissions),
                                 notificationProperty = if (properties.contains(BleProperties.PROPERTY_NOTIFY))
                                     BleProperties.PROPERTY_NOTIFY else if (properties.contains(
                                         BleProperties.PROPERTY_INDICATE
@@ -78,8 +85,10 @@ class ParseService
 
                     characteristics.add(
                         DeviceCharacteristics(
-                            uuid = char.uuid.toString(),
-                            name = deviceCharacteristic?.name ?: "Mfr Characteristic",
+                            uuid = characteristic.uuid.toString(),
+                            //Bluetooth LE Characteristic
+                            name = deviceCharacteristic?.name ?:
+                            Chemistry.getNameByCharacteristicUUID(characteristic.uuid.toString()),
                             descriptor = null,
                             permissions = permissions,
                             properties = properties,
@@ -91,7 +100,7 @@ class ParseService
                             notificationBytes = null
                         )
                     )
-                }
+                } //end of for each characteristic
 
                 val deviceService = DeviceService(
                     service.uuid,
@@ -102,8 +111,8 @@ class ParseService
                 services.add(deviceService)
                 Timber.d(services.toString())
 
-            }
-        }
+            } // end of for each service
+        } //end of if success
 
         return services.toList()
 

@@ -1,6 +1,5 @@
 package com.santansarah.scan.presentation.scan
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -169,10 +168,10 @@ class ScanViewModel(
 
     fun onNameChange(newName: String) {
         val currentDevice = _selectedDevice.value
-        currentDevice?.let {
+        currentDevice?.let { device : ScannedDevice ->
             viewModelScope.launch(dispatcher) {
-                bleRepository.updateDevice(it.copy(customName = newName))
-                _selectedDevice.value = bleRepository.getDeviceByAddress(it.address)
+                bleRepository.updateDevice(device.copy(customName = newName))
+                _selectedDevice.value = bleRepository.getDeviceByAddress(device.address)
                 showUserMessage("$newName updated.")
             }
         }
@@ -180,8 +179,8 @@ class ScanViewModel(
 
     fun onConnect(address: String) {
         Timber.d("calling connect...")
-        val scannedDevice = scanState.value.scanUI.devices.find {
-            it.address == address
+        val scannedDevice = scanState.value.scanUI.devices.find { device ->
+            device.address == address
         }
 
         scannedDevice?.let {

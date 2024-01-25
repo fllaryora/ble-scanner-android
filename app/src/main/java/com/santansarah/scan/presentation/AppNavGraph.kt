@@ -27,7 +27,7 @@ fun AppNavGraph(
     ) {
         composable(HOME) {
             HomeRoute(
-                onControlClick = { deviceAddress ->
+                onControlClick = { deviceAddress: String ->
                     navController.navigate("$CONTROL_SCREEN/$deviceAddress")
                 },
                 appLayoutInfo = appLayoutInfo,

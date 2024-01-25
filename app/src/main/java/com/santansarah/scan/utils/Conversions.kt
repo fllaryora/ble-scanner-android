@@ -2,6 +2,8 @@ package com.santansarah.scan.utils
 
 import android.os.SystemClock
 import timber.log.Timber
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.text.SimpleDateFormat
 import java.util.BitSet
 import java.util.Date
@@ -35,16 +37,17 @@ fun ByteArray.bitsToHex(): String {
 
 fun ByteArray.bits(): String {
     val bitSet = BitSet.valueOf(this)
-    val sb = StringBuilder()
-    for (i in 0..15) {
-        val curBit = if (i <= bitSet.size())
-            bitSet.get(i)
+    val stringBuilder = StringBuilder()
+    val bitRange = 0..15
+    for (index in bitRange) {
+        val curBit = if (index <= bitSet.size())
+            bitSet.get(index)
         else
             false
 
-        sb.append(if (curBit) '1' else '0')
+        stringBuilder.append(if (curBit) '1' else '0')
     }
-    return sb.reverse().toString()
+    return stringBuilder.reverse().toString()
 }
 
 fun ByteArray.toBinaryString(): String {
@@ -54,14 +57,20 @@ fun ByteArray.toBinaryString(): String {
     }
 }
 
-private fun toBinary(num: Int, length: Int): String {
-    var num = num
-    val sb = StringBuilder()
-    for (i in 0 until length) {
-        sb.append(if (num and 1 == 1) '1' else '0')
-        num = num shr 1
+fun ByteArray.toFloat(): String {
+    return ByteBuffer.wrap(this)
+        .order(ByteOrder.LITTLE_ENDIAN).
+    float.toString()
+}
+
+private fun toBinary(number: Int, length: Int): String {
+    var number = number
+    val stringBuilder = StringBuilder()
+    for (index in 0 until length) {
+        stringBuilder.append(if (number and 1 == 1) '1' else '0')
+        number = number shr 1
     }
-    return sb.reverse().toString()
+    return stringBuilder.reverse().toString()
 }
 
 fun LongArray.toHex(): String =
@@ -73,7 +82,7 @@ fun String.decodeHex(): ByteArray {
     with (this.substringAfter("0x")) {
         require(length % 2 == 0) { "Must have an even length" }
         return chunked(2)
-            .map { it.toInt(16).toByte() }
+            .map { textHexadecimal : String -> textHexadecimal.toInt(16).toByte() }
             .toByteArray()
         //.toString(Charsets.ISO_8859_1)
     }
@@ -82,8 +91,8 @@ fun String.decodeHex(): ByteArray {
 fun ByteArray.decodeSkipUnreadable(): String {
     val badChars = '\uFFFD'
 
-    this.forEach {
-        Timber.d(this.indexOf(it).toString() + ": " + it.toInt().toString())
+    this.forEach { byte ->
+        Timber.d(this.indexOf(byte).toString() + ": " + byte.toInt().toString())
     }
 
     val newString = this.decodeToString().filter {
